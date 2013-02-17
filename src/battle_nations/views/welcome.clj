@@ -1,7 +1,8 @@
 (ns battle-nations.views.welcome
   (:require [battle-nations.views.common :as common]
             [noir.content.getting-started]
-            [noir.response])
+            [noir.response]
+            [battle-nations.db_bridge])
   (:use [noir.core :only [defpage]]))
 
 (defpage "/welcome" []
@@ -13,10 +14,10 @@
    [:h1 "this is my first page!"]
    [:p "Hope you like it"]))
 
-(defpage [:get  "/get-game"] []
-  (noir.response/json {"id" "gladimdim"
-                       "game_id" "101010"
-                       }))
+(defpage [:get  "/get-game"] {:keys [player-id]}
+  (if-let [response-data (battle-nations.db_bridge/get-player-games player-id)]
+    (noir.response/json response-data)
+    (noir.response/json {:error "No current games found."})))
 
 (defpage [:post "/current_game"] {:keys [login]}
   (if-let [login_id login]

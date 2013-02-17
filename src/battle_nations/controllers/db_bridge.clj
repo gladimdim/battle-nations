@@ -58,4 +58,5 @@
 
 (defn get-player-games [player-id]
   "Get all current games for player-id."
-  (monger.collection/find-maps "current_games" {$or [{:player_left player-id}, {:player_right player-id}]}))
+  (monger.collection/find-maps "current_games" {$or [{:player_left player-id}, {:player_right player-id}]} {:_id 0}))
+    
