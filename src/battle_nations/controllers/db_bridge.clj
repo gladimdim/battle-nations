@@ -1,4 +1,4 @@
-(ns battle-nations.db_bridge
+(ns battle-nations.controllers.db_bridge
   (:use [monger.collection :only [insert insert-batch]]
         [monger.operators])
   (:require [monger.core :as mg])
@@ -19,17 +19,9 @@
 
 (defn remove-player-from-queue [player-id]
   "Removes player by his id from players_queue table."
-   (monger.collection/remove "players_queue" {:player-id player-id}))
+   (monger.collection/remove "players_queue" {:player_id player-id}))
 
-(defn start-new-game [player-id] 
-  "Is called when user wants to start new game. Checks if another player is in queue
-  and if not - puts player-id into queue."
-  (if-let [waiting-player (get-player-from-queue)]
-    (when-not (= player-id (waiting-player :player_id))
-    ((create-new-game player-id (waiting-player :player_id))
-     (remove-player-from-queue waiting-player))
-      )
-    ((put-player-in-queue player-id))))
+     
      
 
 (defn create-new-game [player-id-left player-id-right]
@@ -38,23 +30,35 @@
                             {:game_id (clojure.string/join "-" [player-id-left player-id-right (gensym)]),
                              :player_left player-id-left,
                              :player_right player-id-right,
-                             :left_army {:bank {:cossack_infantry 3,
-                                                :cossack_light_cavalry 3,
-                                                :cossack_veteran 2,
-                                                :cossack_super_unit 1
+                             :left_army {:bank {:infantry 3,
+                                                :light_cavalry 3,
+                                                :veteran 2,
+                                                :super_unit 1
                                                 },
                                          :field {}
                                          },
-                             :right_army {:bank {:cossack_infantry 3,
-                                                :cossack_light_cavalry 3,
-                                                :cossack_veteran 2,
-                                                :cossack_super_unit 1
+                             :right_army {:bank {:infantry 3,
+                                                :light_cavalry 3,
+                                                :veteran 2,
+                                                :super_unit 1
                                                 },
                                          :field {}
                                          },
                              :left_army_turn true
                                           
                             }))
+
+(defn start-new-game [player-id] 
+  "Is called when user wants to start new game. Checks if another player is in queue
+  and if not - puts player-id into queue."
+  (if-let [waiting-player (get-player-from-queue)]
+    (when-not (= player-id (waiting-player :player_id))
+    (do (create-new-game player-id (waiting-player :player_id))
+     (pr waiting-player)
+     (remove-player-from-queue (waiting-player :player_id))
+      ))
+    ((put-player-in-queue player-id))))
+
 
 (defn get-player-games [player-id]
   "Get all current games for player-id."
