@@ -47,17 +47,38 @@
   "Is called when user wants to start new game. Checks if another player is in queue
   and if not - puts player-id into queue. If successfull - returns string game-id. If not - returns nil"
   (if-let [waiting-player (get-player-from-queue)]
-    (when-not (= player-id (waiting-player :player_id))
+    (if (= player-id (waiting-player :player_id))
+      (hash-map :message "user already in queue")
     (let [game-id (create-new-game player-id (waiting-player :player_id) army (waiting-player :army))]
      (remove-player-from-queue (waiting-player :player_id))
-     game-id
+     (hash-map :game_id game-id)
       ))
     (if (monger.result/ok? (put-player-in-queue player-id army))
-      ({:message "user put into queue"})
-      ({:error "error during saving user to queue"}))))
+      (hash-map :message "user put into queue")
+      (hash-map :error "error during saving user to queue"))))
 
 
 (defn get-player-games [player-id]
   "Get all current games for player-id."
   (monger.collection/find-maps "current_games" {$or [{:player_left player-id}, {:player_right player-id}]} {:_id 0}))
+
+(defn get-game-by-id [game-id]
+  "Get the whole game by its id"
+  (monger.collection/find-maps "current_games" {:game_id game-id} {:_id 0}))
+
+(defn get-army-for-user [player-id game]
+  "Returns map of user's army in game (hash-map)"
+  (let [army (if (= (game :player_left) player-id)
+               (game :left_army)
+               (if (= (game :player_right) player-id)
+                 (game :player_right)
+                 {}))]
+    army))
+(defn place-new-unit [game-id player-id unit position]
+  (let [game (first (get-game-by-id game-id))]
+        (let [army (if (= (game :player_left) player-id)
+                          (game :left_army)
+                          (game :right_army))]
+           army)))
+
     
