@@ -1,6 +1,13 @@
 (ns battle-nations.data.ukraine)
 
-(def cossack_infantry 
+(defn init-army []
+  (hash-map :infantry 3,
+  :light_cavalry 3,
+  :veteran 2,
+  :super_unit 1)
+)
+
+(def infantry 
   {
    :level_life 100
    :range_attack_length 3
@@ -10,7 +17,7 @@
    :immune nil
    })
 
-(def cossack_light_cavalry
+(def light_cavalry
   {
    :level_life 100
    :range_attack_length 0
@@ -20,7 +27,7 @@
    :immune nil
    })
 
-(def cossack_veteran 
+(def veteran 
   {
    :level_life 100
    :range_attack_length 3
@@ -30,7 +37,7 @@
    :immune nil
    })
 
-(def cossack_super_unit 
+(def super_unit 
   {
    :level_life 100
    :range_attack_length 0

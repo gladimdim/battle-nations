@@ -45,14 +45,16 @@
 
 (defn start-new-game [player-id army] 
   "Is called when user wants to start new game. Checks if another player is in queue
-  and if not - puts player-id into queue."
+  and if not - puts player-id into queue. If successfull - returns string game-id. If not - returns nil"
   (if-let [waiting-player (get-player-from-queue)]
     (when-not (= player-id (waiting-player :player_id))
     (let [game-id (create-new-game player-id (waiting-player :player_id) army (waiting-player :army))]
      (remove-player-from-queue (waiting-player :player_id))
      game-id
       ))
-    ((put-player-in-queue player-id army))))
+    (if (monger.result/ok? (put-player-in-queue player-id army))
+      ({:message "user put into queue"})
+      ({:error "error during saving user to queue"}))))
 
 
 (defn get-player-games [player-id]
