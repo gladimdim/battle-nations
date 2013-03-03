@@ -1,19 +1,13 @@
 # battle-nations
 
-A website written in noir. 
+Server-side part of "Nations at Battle" game. Contains web-services which are used by iOS/Android to call API for game. 
 
 ## Usage
 
-If you use cake, substitute 'lein' with 'cake' below. Everything should work fine.
-
-```bash
-lein deps
-lein run
 ```
 
 ## License
 
-Copyright (C) 2011 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
+Copyright (C) 2013 Dmytro Gladkyi
+This code belongs to Dmytro Gladkyi <dmytro.gladkyi@gmail.com>. In no way you can redistribute or use this code without my written permission.
 
