@@ -1,6 +1,6 @@
 (defproject battle-nations "0.1.0-SNAPSHOT"
             :description "FIXME: write this!"
-            :dependencies [[org.clojure/clojure "1.4.0"]
+            :dependencies [[org.clojure/clojure "1.5.0"]
                            [noir "1.3.0-beta3"]
                            [ring/ring-jetty-adapter "0.2.5"]
                            [ring-json-params "0.1.0"]

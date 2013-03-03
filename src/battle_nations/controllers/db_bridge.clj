@@ -27,20 +27,21 @@
   "Creates new game with two player ids"
   (let [game-id (clojure.string/join "-" [player-id-left player-id-right (gensym)])]
 	(monger.collection/insert "current_games"
-                            {:game_id game-id,
+                            {:game {:game_id game-id,
                              :player_left player-id-left,
                              :player_right player-id-right,
-                             :left_army_nation army-left
-                             :left_army {:bank (armies army-left),
-                                         :field {}
-                                         },
-                             :right_army_nation army-right
-                             :right_army {:bank (armies army-right)
-                                         :field {}
-                                         },
+
+                             (keyword player-id-left) {:nation army-left
+                                                       :bank (armies army-left),
+                                                       :field {}
+                                                       },
+                             (keyword player-id-right) {:nation army-right
+                                                        :bank (armies army-right)
+                                                        :field {}
+                                                        },
                              :left_army_turn true
                                           
-                            })
+                            }})
         game-id))
 
 (defn start-new-game [player-id army] 
@@ -60,25 +61,48 @@
 
 (defn get-player-games [player-id]
   "Get all current games for player-id."
-  (monger.collection/find-maps "current_games" {$or [{:player_left player-id}, {:player_right player-id}]} {:_id 0}))
+  (monger.collection/find-maps "current_games" {$or [{:game.player_left player-id}, {:game.player_right player-id}]} {:_id 0}))
 
 (defn get-game-by-id [game-id]
   "Get the whole game by its id"
-  (monger.collection/find-maps "current_games" {:game_id game-id} {:_id 0}))
+  (first (monger.collection/find-maps "current_games" {:game.game_id game-id} {:_id 0})))
 
 (defn get-army-for-user [player-id game]
   "Returns map of user's army in game (hash-map)"
-  (let [army (if (= (game :player_left) player-id)
-               (game :left_army)
-               (if (= (game :player_right) player-id)
-                 (game :player_right)
-                 {}))]
-    army))
+  ((keyword player-id) (:game game)))
+
+(defn get-bank-for-army [army]
+  "Returns bank hash-map for army (hash-map)"
+  (army :bank))
+
+(defn enough-unit-qty? [bank unit]
+  "Returns true if there is enough quantity of unit to put it on board. bank is a hash-map"
+  (if (contains? bank (keyword unit))
+    (> (bank (keyword unit)) 0)
+    false))
+
+(defn get-nation-by-player-id [game player-id]
+  (((keyword player-id) (:game game)) :nation))
+
+(defn reduce-unit-qty [bank unit]
+  (assoc bank (keyword unit) (- (bank (keyword unit)) 1)))
+
+(defn move-unit-to-position [bank army game-id unit position]
+  "Moves unit in game to position. Game - hash-map, Game-id - string, position - hashmap, unit - string."
+  (let [new-bank (reduce-unit-qty bank unit)]
+    new-bank))
+    
+(update-game-with-new-data [new-user-data]
+  
+
 (defn place-new-unit [game-id player-id unit position]
-  (let [game (first (get-game-by-id game-id))]
-        (let [army (if (= (game :player_left) player-id)
-                          (game :left_army)
-                          (game :right_army))]
-           army)))
+  (let [game (get-game-by-id game-id)]
+    (let [army (get-army-for-user player-id game)]
+      (let [bank (get-bank-for-army army)]
+         (if (enough-unit-qty? bank unit)
+           (let [reduced-bank (reduce-unit-qty bank unit)]
+            (let [new-field (merge (army :field) {(keyword unit) (merge (eval (symbol (str "battle-nations.data." (get-nation-by-player-id game player-id)) unit)) {:position [0, 0]})})]
+              (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}})
+)))))))
 
     

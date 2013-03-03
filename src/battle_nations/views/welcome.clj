@@ -15,15 +15,20 @@
 (defroutes handler 
   (GET "/" []
        (json-response {"hello" "world"}))
-  (GET "/get-game" [player-id]
+
+  (POST "/get-game" [player-id]
   (if-let [response-data (battle-nations.controllers.db_bridge/get-player-games player-id)]
-    (json-response response-data)
-    (json-response {:error "No current games found."})))
+    (if (empty? response-data)
+      (json-response {:error "No current games found."})
+      (json-response response-data))))
+
+        
+
   (PUT "/test" [name]
        (json-response {"hello" name}))
   (POST "/want-to-play" [player-id army]
         (if (and player-id army)
-          (json-response {:game_id (battle-nations.controllers.db_bridge/start-new-game player-id army)} 200)
+          (json-response {:result (battle-nations.controllers.db_bridge/start-new-game player-id army)} 200)
           (json-response {:error "Missing parameters in request"} 500))))
 
 (def app 
