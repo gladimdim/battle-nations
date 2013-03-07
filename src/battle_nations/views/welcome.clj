@@ -31,6 +31,22 @@
           (json-response {:result (battle-nations.controllers.db_bridge/start-new-game player-id army)} 200)
           (json-response {:error "Missing parameters in request"} 500))))
 
+(defn- log [msg & vals]
+  (let [line (apply format msg vals)]
+    (locking System/out (println line))))
+
+(defn wrap-request-logging [handler]
+  (fn [{:keys [request-method uri] :as req}]
+    (let [start (System/currentTimeMillis)
+          resp (handler req)
+          finish (System/currentTimeMillis)
+          total (- finish start)]
+      (log "Request %s %s (%dms)" request-method uri total)
+      resp)))
+
 (def app 
   (-> handler 
+      (wrap-request-logging)
       wrap-json-params))
+
+(defonce server (run-jetty #'app {:port 8080 :join? false}))
