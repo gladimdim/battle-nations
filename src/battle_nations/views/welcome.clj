@@ -46,7 +46,7 @@
 
 (def app 
   (-> handler 
-      (wrap-request-logging)
+      wrap-request-logging
       wrap-json-params))
 
 (defonce server (run-jetty #'app {:port 8080 :join? false}))

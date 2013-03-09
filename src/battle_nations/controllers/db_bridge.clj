@@ -33,11 +33,11 @@
 
                              (keyword player-id-left) {:nation army-left
                                                        :bank (armies army-left),
-                                                       :field {}
+                                                       :field []
                                                        },
                              (keyword player-id-right) {:nation army-right
                                                         :bank (armies army-right)
-                                                        :field {}
+                                                        :field []
                                                         },
                              :left_army_turn true
                                           
@@ -92,8 +92,6 @@
   (let [new-bank (reduce-unit-qty bank unit)]
     new-bank))
     
-(update-game-with-new-data [new-user-data]
-  
 
 (defn place-new-unit [game-id player-id unit position]
   (let [game (get-game-by-id game-id)]
@@ -101,8 +99,10 @@
       (let [bank (get-bank-for-army army)]
          (if (enough-unit-qty? bank unit)
            (let [reduced-bank (reduce-unit-qty bank unit)]
-            (let [new-field (merge (army :field) {(keyword unit) (merge (eval (symbol (str "battle-nations.data." (get-nation-by-player-id game player-id)) unit)) {:position [0, 0]})})]
-              (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}})
+            (let [new-field (merge (army :field) {(keyword unit) (merge (eval (symbol (str "battle-nations.data." (get-nation-by-player-id game player-id)) unit)) {:position position})})]
+              (do 
+                (monger.collection/update "current_games" {:game.game_id game-id} { $inc {(keyword (symbol (str "game." player-id ".bank." unit))) -1}})
+                 (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}} :upsert true))
 )))))))
 
     
