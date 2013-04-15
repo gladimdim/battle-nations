@@ -75,6 +75,13 @@
   "Returns bank hash-map for army (hash-map)"
   (army :bank))
 
+(defn get-field-for-player-id [game player-id]
+  "Returns field array for specific player-id in game."
+  (((game :game) (keyword player-id)) :field))
+
+(defn get-field-for-army [army]
+  (army :field))
+
 (defn enough-unit-qty? [bank unit]
   "Returns true if there is enough quantity of unit to put it on board. bank is a hash-map"
   (if (contains? bank (keyword unit))
@@ -86,12 +93,6 @@
 
 (defn reduce-unit-qty [bank unit]
   (assoc bank (keyword unit) (- (bank (keyword unit)) 1)))
-
-(defn move-unit-to-position [bank army game-id unit position]
-  "Moves unit in game to position. Game - hash-map, Game-id - string, position - hashmap, unit - string."
-  (let [new-bank (reduce-unit-qty bank unit)]
-    new-bank))
-    
 
 (defn place-new-unit [game-id player-id unit position]
   (let [game (get-game-by-id game-id)]
@@ -106,3 +107,8 @@
 )))))))
 
     
+(defn apply-moves [game-id game-moves player-id final-table]
+  "Applies moves to specific game-id and commits it to db."
+  (let [response  (monger.collection/update "current_games" {:game.game_id game-id} {$set {:game final-table}} :upsert true)]
+    (monger.result/ok? response)))
+

@@ -15,7 +15,6 @@
    :range_attack_strength 0
    :range_move 3
    :melee_attack_strength 30
-   :immune nil
   })
 
 (def infantry 
@@ -25,7 +24,6 @@
    :range_attack_strength 30
    :range_move 1
    :melee_attack_strength 20
-   :immune nil
    })
 
 (def light_cavalry
@@ -35,7 +33,6 @@
    :range_attack_strength 0
    :range_move 3
    :melee_attack_strength 30
-   :immune nil
    })
 
 (def veteran 
@@ -45,7 +42,6 @@
    :range_attack_strength 40
    :range_move 2
    :melee_attack_strength 25
-   :immune nil
    })
 
 (def super_unit 
@@ -55,7 +51,6 @@
    :range_attack_strength 0
    :range_move 3
    :melee_attack_strength 40
-   :immune nil
    })
   
   

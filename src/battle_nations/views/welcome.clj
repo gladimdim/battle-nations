@@ -16,16 +16,18 @@
   (GET "/" []
        (json-response {"hello" "world"}))
 
+  (POST "/send-game" [game-id moves player-id final-table]
+        (json-response (battle-nations.controllers.db_bridge/apply-moves game-id moves player-id final-table)))
+
   (POST "/get-game" [player-id]
   (if-let [response-data (battle-nations.controllers.db_bridge/get-player-games player-id)]
     (if (empty? response-data)
       (json-response {:error "No current games found."})
       (json-response response-data))))
 
-        
-
   (PUT "/test" [name]
        (json-response {"hello" name}))
+
   (POST "/want-to-play" [player-id army]
         (if (and player-id army)
           (json-response {:result (battle-nations.controllers.db_bridge/start-new-game player-id army)} 200)
