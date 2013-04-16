@@ -18,7 +18,8 @@
 
   (POST "/send-game" [game-id moves player-id final-table]
         (json-response (battle-nations.controllers.db_bridge/apply-moves game-id moves player-id final-table)))
-
+  (PUT "/register" [player-id email]
+       (json-response (battle-nations.controllers.db_bridge/register player-id email)))
   (POST "/get-game" [player-id]
   (if-let [response-data (battle-nations.controllers.db_bridge/get-player-games player-id)]
     (if (empty? response-data)
