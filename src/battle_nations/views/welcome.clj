@@ -15,20 +15,17 @@
 (defroutes handler 
   (GET "/" []
        (json-response {"hello" "world"}))
-
   (POST "/send-game" [game-id moves player-id final-table]
         (json-response (battle-nations.controllers.db_bridge/apply-moves game-id moves player-id final-table)))
-  (PUT "/register" [player-id email]
+  (PUT "/v1/register" [player-id email]
        (json-response (battle-nations.controllers.db_bridge/register player-id email)))
   (POST "/get-game" [player-id]
   (if-let [response-data (battle-nations.controllers.db_bridge/get-player-games player-id)]
     (if (empty? response-data)
       (json-response {:error "No current games found."})
       (json-response response-data))))
-
   (PUT "/test" [name]
        (json-response {"hello" name}))
-
   (POST "/want-to-play" [player-id army]
         (if (and player-id army)
           (json-response {:result (battle-nations.controllers.db_bridge/start-new-game player-id army)} 200)
@@ -52,4 +49,10 @@
       wrap-request-logging
       wrap-json-params))
 
-(defonce server (run-jetty #'app {:port 8080 :join? false}))
+(defonce server (run-jetty #'app {:port 8082
+                              :join? false
+                              :ssl? true
+                              :ssl-port 8444
+                              :keystore "my.keystore"
+                              :key-password "diecrupps85"
+                              }))

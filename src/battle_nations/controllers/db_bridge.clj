@@ -114,11 +114,12 @@
 
 (defn register [player-id email]
   "Registers user with username (player-id)  and email. If already exists - returns error."
-  (if-let [username (monger.collection/find-one-as-map "players" {:player_id player-id} {:_id 0})]
-    (if (= email (username :email))
-      (hash-map :result "success" :message "User is already registered. Authorized.")
-      (hash-map :result "fail" :message "Wrong combination of username and email."))
-    (let [result (monger.collection/insert "players" {:player_id player-id :email email})]
-      (if (monger.result/ok? result)
-        (hash-map :result "success" :message "User registered.")
-        (hash-map :result "fail" :message "Could not add new user.")))))
+  (if-let [username (monger.collection/find-one-as-map "players" {"$and" [{:player_id player-id}, {:email email}]} {:_id 0})]
+    (hash-map :result "success" :message "User is already registered. Authorized.")
+    (if-let [record (monger.collection/find-one-as-map "players" {"$or" [{:player_id player-id}, {:email email}]} {:_id 0})]
+      (hash-map :result "fail" :message "Wrong combination of username and email")
+      (let [result (monger.collection/insert "players" {:player_id player-id :email email})]
+        (if (monger.result/ok? result)
+          (hash-map :result "success" :message "User registered.")
+          (hash-map :result "fail" :message "Could not add new user."))))))
+
