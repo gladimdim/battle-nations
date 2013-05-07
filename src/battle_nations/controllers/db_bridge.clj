@@ -11,7 +11,9 @@
 
 (defn put-player-in-queue [player-id army]
   "Puts player by his id into game's queue"
-  (insert "players_queue" {:player_id player-id :army army}))
+  (if (user-registered? player-id)
+    (insert "players_queue" {:player_id player-id :army army})
+    (hash-map :result "fail" :message "Not authorized to ask for new game.")))
 
 (defn get-player-from-queue []
   "Returns a player object which was matched from players_queue"
@@ -61,7 +63,9 @@
 
 (defn get-player-games [player-id]
   "Get all current games for player-id."
-  (monger.collection/find-maps "current_games" {$or [{:game.player_left player-id}, {:game.player_right player-id}]} {:_id 0}))
+  (if (user-registered? player-id)
+    (monger.collection/find-maps "current_games" {$or [{:game.player_left player-id}, {:game.player_right player-id}]} {:_id 0})
+    (hash-map :result "fail" :message "Not authorized to get player games.")))
 
 (defn get-game-by-id [game-id]
   "Get the whole game by its id"
@@ -106,11 +110,16 @@
                  (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}} :upsert true))
 )))))))
 
+(defn user-registered? [player-id]
+  "Returns map of registered user. If not found - returns nil."
+  (monger.collection/find-one-as-map "players" {:player_id player-id} {:_id 0}))
     
 (defn apply-moves [game-id game-moves player-id final-table]
-  "Applies moves to specific game-id and commits it to db."
-  (let [response  (monger.collection/update "current_games" {:game.game_id game-id} {$set {:game final-table}} :upsert true)]
-    (monger.result/ok? response)))
+  "Applies moves to specific game-id and commits it to db. ALso checks if user is registered."
+  (if (user-registered? player-id)
+    (let [response  (monger.collection/update "current_games" {:game.game_id game-id} {$set {:game final-table}} :upsert true)]
+      (monger.result/ok? response))
+    (hash-map :result "fail" :message "Not authorized to commit game turns.")))
 
 (defn register [player-id email]
   "Registers user with username (player-id)  and email. If already exists - returns error."
