@@ -9,6 +9,10 @@
 (mg/set-db! (monger.core/get-db "test"))
 (insert "document" {:a 10})
 
+(defn user-registered? [player-id]
+  "Returns map of registered user. If not found - returns nil."
+  (monger.collection/find-one-as-map "players" {:player_id player-id} {:_id 0}))
+
 (defn put-player-in-queue [player-id army]
   "Puts player by his id into game's queue"
   (if (user-registered? player-id)
@@ -110,9 +114,6 @@
                  (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}} :upsert true))
 )))))))
 
-(defn user-registered? [player-id]
-  "Returns map of registered user. If not found - returns nil."
-  (monger.collection/find-one-as-map "players" {:player_id player-id} {:_id 0}))
     
 (defn apply-moves [game-id game-moves player-id final-table]
   "Applies moves to specific game-id and commits it to db. ALso checks if user is registered."
