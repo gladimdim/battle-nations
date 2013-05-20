@@ -4,8 +4,18 @@
   (hash-map :infantry 3,
   :light_cavalry 3,
   :veteran 2,
+  :healer 2,
   :super_unit 1)
 )
+
+(def healer 
+{
+ :level_life 100
+ :range_attack_length 3
+ :range_attack_strength 30
+ :range_move 1
+ :melee_attack_strength 35
+ })
 
 (def infantry 
   {
