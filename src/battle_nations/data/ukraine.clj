@@ -12,9 +12,8 @@
 {
  :level_life 100
  :range_attack_length 3
- :range_attack_strength 30
- :range_move 1
- :melee_attack_strength 35
+ :range_move 2
+ :heal 35
  })
 
 (def infantry 
