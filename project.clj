@@ -6,6 +6,7 @@
                            [ring-json-params "0.1.0"]
                            [compojure "0.4.0"]
                            [clj-json "0.2.0"]
-                           [com.novemberain/monger "1.4.2"]]
+                           [com.novemberain/monger "1.4.2"]
+                           [herolabs/apns "0.2.1"]]
             :main battle-nations.server)
 
