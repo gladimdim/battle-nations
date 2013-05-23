@@ -13,7 +13,7 @@
 (insert "document" {:a 10})
 
 (defn send-push [device message]
-  (let [service (.build (.withSandboxDestination (.withCert (APNS/newService) "Certificates.p12" "be just like me")))
+  (let [service (.build (.withSandboxDestination (.withCert (APNS/newService) "./certs/Certificates.p12" "be just like me")))
         payload (.build (.alertBody (APNS/newPayload) message))]
     (.push service device payload)))
 

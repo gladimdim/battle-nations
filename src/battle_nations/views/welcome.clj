@@ -53,6 +53,6 @@
                               :join? false
                               :ssl? true
                               :ssl-port 8444
-                              :keystore "my.keystore"
+                              :keystore "./certs/my.keystore"
                               :key-password "diecrupps85"
                               }))
