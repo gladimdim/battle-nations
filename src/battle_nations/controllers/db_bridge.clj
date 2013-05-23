@@ -121,22 +121,40 @@
                 (monger.collection/update "current_games" {:game.game_id game-id} { $inc {(keyword (symbol (str "game." player-id ".bank." unit))) -1}})
                  (monger.collection/update "current_games" {:game.game_id game-id} { $set {(keyword (symbol (str "game." player-id ".field"))) new-field}} :upsert true))
 )))))))
-
+(defn get-token [player-id]
+  "Gets device token id for push notification."
+  (let [user (monger.collection/find-one-as-map "players" {:player_id player-id})]
+        (user :deviceToken)))
     
+(defn get-player-id-for-apns [player-id-move game]
+  "Gets opposite player id."
+  (let [suppose ((game :game) :player_left)]
+    (if (= suppose player-id-move)
+      ((game :game) :player_right)
+      ((game :game) :player_left))))
+
+(defn send-push-for-game [game-id player-id-move]
+  (let [game (get-game-by-id game-id)
+        op-player (get-player-id-for-apns player-id-move game)
+        device-token (get-token op-player)]
+    (send-push device-token (str "It is your turn with " player-id-move))
+  ))
+
 (defn apply-moves [game-id game-moves player-id final-table]
   "Applies moves to specific game-id and commits it to db. ALso checks if user is registered."
   (if (user-registered? player-id)
     (let [response  (monger.collection/update "current_games" {:game.game_id game-id} {$set {:game final-table}} :upsert true)]
+      (send-push-for-game game-id player-id)
       (monger.result/ok? response))
     (hash-map :result "fail" :message "Not authorized to commit game turns.")))
 
-(defn register [player-id email]
+(defn register [player-id email deviceToken]
   "Registers user with username (player-id)  and email. If already exists - returns error."
   (if-let [username (monger.collection/find-one-as-map "players" {"$and" [{:player_id player-id}, {:email email}]} {:_id 0})]
     (hash-map :result "success" :message "User is already registered. Authorized.")
     (if-let [record (monger.collection/find-one-as-map "players" {"$or" [{:player_id player-id}, {:email email}]} {:_id 0})]
       (hash-map :result "fail" :message "Wrong combination of username and email")
-      (let [result (monger.collection/insert "players" {:player_id player-id :email email})]
+      (let [result (monger.collection/insert "players" {:player_id player-id :email email :deviceToken deviceToken})]
         (if (monger.result/ok? result)
           (hash-map :result "success" :message "User registered.")
           (hash-map :result "fail" :message "Could not add new user."))))))

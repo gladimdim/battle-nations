@@ -17,8 +17,8 @@
        (json-response {"hello" "world"}))
   (POST "/send-game" [game-id moves player-id final-table]
         (json-response (battle-nations.controllers.db_bridge/apply-moves game-id moves player-id final-table)))
-  (PUT "/v1/register" [player-id email]
-       (json-response (battle-nations.controllers.db_bridge/register player-id email)))
+  (PUT "/v1/register" [player-id email deviceToken]
+       (json-response (battle-nations.controllers.db_bridge/register player-id email deviceToken)))
   (POST "/get-game" [player-id]
   (if-let [response-data (battle-nations.controllers.db_bridge/get-player-games player-id)]
     (if (empty? response-data)
