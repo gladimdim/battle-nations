@@ -1,13 +1,21 @@
 (ns battle-nations.controllers.db_bridge
   (:use [monger.collection :only [insert insert-batch]]
-        [monger.operators])
+        [monger.operators]
+        )
+
   (:require [monger.core :as mg])
-  (:import [com.mongodb MongoOptions ServerAddress]))
+  (:import [com.mongodb MongoOptions ServerAddress]
+           [com.notnoop.apns APNS]))
 
 (mg/connect!)
 
 (mg/set-db! (monger.core/get-db "test"))
 (insert "document" {:a 10})
+
+(defn send-push [device message]
+  (let [service (.build (.withSandboxDestination (.withCert (APNS/newService) "Certificates.p12" "be just like me")))
+        payload (.build (.alertBody (APNS/newPayload) message))]
+    (.push service device payload)))
 
 (defn user-registered? [player-id]
   "Returns map of registered user. If not found - returns nil."
