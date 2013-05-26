@@ -15,7 +15,7 @@
 (defroutes handler 
   (GET "/" []
        (json-response {"hello" "world"}))
-  (POST "/send-game" [game-id moves player-id final-table]
+  (POST "/send-game" [game-id moves player-id final-table initial-table]
         (json-response (battle-nations.controllers.db_bridge/apply-moves game-id moves player-id final-table)))
   (PUT "/v1/register" [player-id email deviceToken]
        (json-response (battle-nations.controllers.db_bridge/register player-id email deviceToken)))
